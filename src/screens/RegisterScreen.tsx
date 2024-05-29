@@ -2,10 +2,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { Menu, Divider, Provider as PaperProvider, Button } from 'react-native-paper';
+import { launchImageLibrary } from 'react-native-image-picker';
 import beeLogo from '../assets/bee_image.png';
+import placeHolder from '../assets/placeholder.png';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { launchImagePicker } from '../utils/imagePicker';
+import AuthService from '../services/AuthService';
+import storage from '@react-native-firebase/storage';
 
 interface FormData {
   name: string;
@@ -13,7 +16,9 @@ interface FormData {
   password: string;
   confirmPassword: string;
   image: string;
+  goal: string;
 }
+
 
 const RegisterScreen = () => {
   const navigation = useNavigation();
@@ -22,24 +27,50 @@ const RegisterScreen = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [image, setImage] = useState('');
+  const [goal, setGoal] = useState('');
+  const [menuVisible, setMenuVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
-    // Validate form fields
-    // ...
-
+    //  TOD: Validate form fields
+    if (!name || !email || !password || !confirmPassword || !goal) {
+      Toast.show({
+        type: 'error',
+        text1: 'Please fill in all fields.',
+      });
+      return;
+    }
+    // Validate email format using a regular expression
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    Toast.show({
+      type: 'error',
+      text1: 'Please enter a valid email address',
+    });
+    if(password!==confirmPassword){
+        Toast.show({
+            type: 'error',
+            text1: 'Passwords do not match',
+          });
+    }
     // Create form data to send to the server
-    const formData: FormData = {
+    const formDat = {
       name,
       email,
       password,
-      confirmPassword,
       image,
+      goal,
     };
 
     try {
       // Send the formData to the server
-      console.log('formData:', formData);
+        //use auth service
+      await AuthService.registerUser(email, password, formDat);
+      //TODO: save the information locally in sqlite room
+      
+      
+      console.log('formData:', formDat);
+      console.log('successful register');
       // If the registration is successful, navigate to the profile page
     //   navigation.navigate('Profile');
     } catch (error) {
@@ -51,10 +82,58 @@ const RegisterScreen = () => {
     }
   };
 
-  const handleImagePicker = async () => {
-    const selectedImage = await launchImagePicker();
-    if (selectedImage) {
-      setImage(selectedImage);
+  const handleImageUpload = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo' });
+    if (result.assets && result.assets.length > 0) {
+      setIsLoading(true);
+      try {
+        const selectedImage = result.assets[0];
+        const storageRef = storage().ref(`images/${Date.now()}_${selectedImage.fileName}`);
+        const uploadTask = storageRef.putFile(selectedImage.uri!);
+  
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload is ${progress}% done`);
+          },
+          (error) => {
+            console.error('Error uploading image:', error);
+            Toast.show({
+              type: 'error',
+              text1: 'Failed to upload image, please try again later.',
+            });
+          },
+        () => {
+            if (uploadTask.snapshot) {
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
+                    console.log('File available at', downloadUrl);
+                    setImage(downloadUrl);
+                });
+            }
+        }
+        );
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to upload image, please try again later.',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+  
+  const getDownloadURL = async (reference: any) => {
+    try {
+      return await reference.getDownloadURL();
+    } catch (error) {
+      console.error('Error getting download URL:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to get download URL, please try again later.',
+      });
     }
   };
 
@@ -67,9 +146,9 @@ const RegisterScreen = () => {
           {isLoading ? (
             <ActivityIndicator size="large" style={styles.loadingIndicator} />
           ) : (
-            <Image source={{ uri: image || 'https://via.placeholder.com/150' }} style={styles.profileImage} />
+            <Image source={image ? { uri: image } : placeHolder} style={styles.profileImage} />
           )}
-          <TouchableOpacity style={styles.profileImageButton} onPress={handleImagePicker}>
+          <TouchableOpacity style={styles.profileImageButton} onPress={handleImageUpload}>
             <Text style={styles.profileImageButtonText}>+ PROFILE IMAGE</Text>
           </TouchableOpacity>
         </View>
@@ -100,6 +179,44 @@ const RegisterScreen = () => {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
+        <Menu
+        visible={menuVisible}
+        onDismiss={() => setMenuVisible(false)}
+        anchor={
+            <TouchableOpacity
+            style={[styles.input]}
+            onPress={() => setMenuVisible(true)}
+            >
+            <Text style={styles.placeholderText}>
+                {goal || 'What would you like to achieve?'}
+            </Text>
+            </TouchableOpacity>
+        }
+        >
+        <Menu.Item
+            title="Health and Wellness"
+            onPress={() => {
+            setGoal('Health and Wellness');
+            setMenuVisible(false);
+            }}
+        />
+        <Divider />
+        <Menu.Item
+            title="Self Confidence"
+            onPress={() => {
+            setGoal('Self Confidence');
+            setMenuVisible(false);
+            }}
+        />
+        <Divider />
+        <Menu.Item
+            title="Interpersonal Communications"
+            onPress={() => {
+            setGoal('Interpersonal Communications');
+            setMenuVisible(false);
+            }}
+        />
+        </Menu>
         <Button
           mode="contained"
           onPress={handleRegister}
@@ -121,15 +238,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
     marginTop: 32,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#53372D',
     marginTop: 16,
+    alignItems: 'center',
   },
   profileImageContainer: {
     flexDirection: 'row',
@@ -182,6 +301,14 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     marginTop: 32,
+  },
+  placeholderText: {
+    color: '#53372D',
+    fontSize: 16,
+    marginTop: 8,
+  },
+  dropdownMenuContainer: {
+    width: '400%',
   },
 });
 
