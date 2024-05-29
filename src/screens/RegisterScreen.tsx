@@ -67,7 +67,7 @@ const RegisterScreen = () => {
         //use auth service
       await AuthService.registerUser(email, password, formDat);
       //TODO: save the information locally in sqlite room
-      
+
       
       console.log('formData:', formDat);
       console.log('successful register');
@@ -311,5 +311,5 @@ const styles = StyleSheet.create({
     width: '400%',
   },
 });
-
+}
 export default RegisterScreen;
