@@ -19,7 +19,6 @@ interface FormData {
   goal: string;
 }
 
-
 const RegisterScreen = () => {
   const navigation = useNavigation();
   const [name, setName] = useState('');
@@ -32,7 +31,7 @@ const RegisterScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
-    //  TOD: Validate form fields
+    // TODO: Validate form fields
     if (!name || !email || !password || !confirmPassword || !goal) {
       Toast.show({
         type: 'error',
@@ -40,39 +39,44 @@ const RegisterScreen = () => {
       });
       return;
     }
+  
     // Validate email format using a regular expression
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    Toast.show({
-      type: 'error',
-      text1: 'Please enter a valid email address',
-    });
-    if(password!==confirmPassword){
-        Toast.show({
-            type: 'error',
-            text1: 'Passwords do not match',
-          });
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Please enter a valid email address',
+      });
+      return;
     }
+  
+    if (password !== confirmPassword) {
+      Toast.show({
+        type: 'error',
+        text1: 'Passwords do not match',
+      });
+      return;
+    }
+  
     // Create form data to send to the server
-    const formDat = {
+    const formData = {
       name,
       email,
       password,
       image,
       goal,
     };
-
+  
     try {
       // Send the formData to the server
-        //use auth service
-      await AuthService.registerUser(email, password, formDat);
-      //TODO: save the information locally in sqlite room
-
-      
-      console.log('formData:', formDat);
+      // Use auth service
+      await AuthService.registerUser(email, password, formData);
+      // TODO: Save the information locally in SQLite or Realm
+  
+      console.log('formData:', formData);
       console.log('successful register');
       // If the registration is successful, navigate to the profile page
-    //   navigation.navigate('Profile');
+      navigation.navigate('Profile' as never);
     } catch (error) {
       console.error('Registration error:', error);
       Toast.show({
@@ -311,5 +315,5 @@ const styles = StyleSheet.create({
     width: '400%',
   },
 });
-}
+
 export default RegisterScreen;
