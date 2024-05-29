@@ -20,7 +20,7 @@ const LoginScreen = () => {
         await loginWithEmailAndPassword(email, password);
         // Navigate to the desired screen after successful login
         console.log('User logged in successfully');
-        // navigation.navigate('Profile' as never);
+        navigation.navigate('Profile' as never);
       } catch (error) {
         setErrorMessage('Login failed. Please check your email and password.');
       }
