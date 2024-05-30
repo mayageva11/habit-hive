@@ -68,23 +68,23 @@ const ProfileScreen = () => {
   }
 
   const handleEditProfile = () => {
-    // Navigate to the edit profile screen
+    navigation.navigate('EditProfile' as never);
   };
 
   const handleMyPosts = () => {
-    // Navigate to the user's posts screen
+    navigation.navigate('MyPosts' as never);
   };
 
   const handleUploadPost = () => {
-    // Navigate to the upload post screen
+    navigation.navigate('UploadAPost' as never);
   };
 
   const handleCommunity = () => {
-    // Navigate to the community screen
+    navigation.navigate('Community' as never);
   };
 
   const handleHabits = () => {
-    // Navigate to the habits screen
+    navigation.navigate('Habits' as never);
   };
 
   const handleLogout = async () => {
