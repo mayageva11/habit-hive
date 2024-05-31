@@ -1,11 +1,10 @@
-// MyPostsScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
-import { Card, Title, Paragraph, Avatar, IconButton } from 'react-native-paper';
-import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';
+import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text, Image } from 'react-native';
+import { Card, Title, Paragraph, Avatar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import firebase from '@react-native-firebase/app';
+import firestore from '@react-native-firebase/firestore';
 
 interface Post {
   id: string;
@@ -17,19 +16,15 @@ interface Post {
   createdAt: Date;
 }
 
-const MyPostsScreen: React.FC = () => {
-  const user = auth().currentUser;
-  const navigation = useNavigation();
+const CommunityScreen: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [searchText, setSearchText] = useState('');
+  const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchUserPosts = async () => {
+    const fetchPosts = async () => {
       try {
-        const postSnapshot = await firestore()
-          .collection('posts')
-          .where('uid', '==', user?.uid)
-          .get();
-
+        const postSnapshot = await firestore().collection('posts').get();
         const postData: Post[] = await Promise.all(
           postSnapshot.docs.map(async (doc) => ({
             id: doc.id,
@@ -44,49 +39,31 @@ const MyPostsScreen: React.FC = () => {
 
         setPosts(postData);
       } catch (error) {
-        console.error('Error fetching user posts:', error);
+        console.error('Error fetching posts:', error);
       }
     };
+    fetchPosts();
+  }, []);
 
-    fetchUserPosts();
-  }, [user?.uid]);
+  const filteredPosts = posts.filter((post) =>
+    post.userName.toLowerCase().includes(searchText.toLowerCase())
+  );
 
-  const handleEditPost = (post: Post) => {
-    // Navigate to the edit post screen
-    // navigation.navigate('EditPost', { post });
-  };
-
-  const handleDeletePost = async (postId: string) => {
-    try {
-      // Delete the post from Firestore
-      await firestore().collection('posts').doc(postId).delete();
-
-      // Refresh the posts
-      const updatedPosts = posts.filter((post) => post.id !== postId);
-      setPosts(updatedPosts);
-    } catch (error) {
-      console.error('Error deleting post:', error);
-    }
+  const handleProfile = () => {
+    navigation.navigate('Profile' as never);
   };
 
   const handleCommunity = () => {
-    // Navigate to the community screen
     navigation.navigate('Community' as never);
   };
 
   const handleHabits = () => {
-    // Navigate to the habits screen
     navigation.navigate('Habits' as never);
-  };
-  const handleProfile = () => {
-    // Navigate to the habits screen
-    navigation.navigate('Profile' as never);
   };
 
   const handleLogout = async () => {
     try {
-      await auth().signOut();
-      // Optionally, you can navigate to the login screen after successful logout
+      await firebase.auth().signOut();
       navigation.navigate('Login' as never);
     } catch (error) {
       console.error('Error signing out:', error);
@@ -95,12 +72,18 @@ const MyPostsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Search by name"
+        value={searchText}
+        onChangeText={setSearchText}
+      />
       <FlatList
-        data={posts}
+        data={filteredPosts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Card style={styles.card}>
-            <View style={styles.cardHeader}>
+             <View style={styles.cardHeader}>
             <Image source={{ uri: item.userImage }} style={styles.avatar} /> 
             <View style={styles.cardTitle}>
               <Title style={styles.userName}>{item.userName}</Title>
@@ -111,24 +94,9 @@ const MyPostsScreen: React.FC = () => {
             <Card.Content>
               <Paragraph style={styles.content}>{item.content}</Paragraph>
             </Card.Content>
-            <Card.Actions>
-                <IconButton
-                    icon="pencil"
-                    style={styles.deleteIcon}
-                    onPress={() => handleEditPost(item)}
-                />
-                <IconButton
-                     icon="delete"
-                     size={24}
-                     style={[styles.deleteIcon, { backgroundColor: '#FFC107' }]}
-                     onPress={() => handleDeletePost(item.id)}
-                />
-            </Card.Actions>
           </Card>
         )}
       />
-
-      {/* Bottom navigation */}
       <View style={styles.bottomNavigationBar}>
         <TouchableOpacity style={styles.navButton} onPress={handleProfile}>
           <Icon name="person-outline" size={24} color="#53372D" />
@@ -156,6 +124,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  searchBar: {
+    backgroundColor: '#EEEEEE',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginVertical: 12,
+    marginHorizontal: 16,
+    borderRadius: 8,
+  },
   card: {
     marginVertical: 8,
     marginHorizontal: 16,
@@ -172,9 +148,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginHorizontal: 16,
   },
-  deleteIcon: {
-    color: '#53372D',
-    backgroundColor: '#FFC107',
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40, 
+    marginHorizontal: 20,
+    marginVertical: 16,
   },
   userName: {
     margin: 5,
@@ -186,15 +165,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 8,
   },
-  navButton: {
-    alignItems: 'center',
-  },
-  navButtonText: {
-    fontSize: 12,
-    color: '#53372D',
-    marginTop: 4,
-    fontWeight: 'bold',
-  },
   bottomNavigationBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -205,12 +175,14 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 0,
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginHorizontal: 20,
-    marginVertical: 16,
+  navButton: {
+    alignItems: 'center',
+  },
+  navButtonText: {
+    fontSize: 12,
+    color: '#53372D',
+    marginTop: 4,
+    fontWeight: 'bold',
   },
   title:{
     fontSize: 24,
@@ -222,4 +194,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default MyPostsScreen;
+export default CommunityScreen;
