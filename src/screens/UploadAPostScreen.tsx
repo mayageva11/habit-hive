@@ -18,6 +18,7 @@ const UploadAPostScreen: React.FC = () => {
   const [image, setImage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState('');
+  const [profileImage, setProfileImage] = useState('');
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -29,6 +30,7 @@ const UploadAPostScreen: React.FC = () => {
 
         if (!userDoc.empty) {
           setUserName(userDoc.docs[0].data().name);
+          setProfileImage(userDoc.docs[0].data().image)
         } else {
           console.error('User data not found');
         }
@@ -48,6 +50,7 @@ const UploadAPostScreen: React.FC = () => {
         content,
         image,
         userName,
+        profileImage,
         createdAt: firestore.FieldValue.serverTimestamp(),
       });
       // Navigate to the "Posts" screen after successful post upload
