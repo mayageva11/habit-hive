@@ -7,6 +7,7 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import UploadAPostScreen from './src/screens/UploadAPostScreen';
 import MyPostsScreen from './src/screens/MyPostsScreen';
+import CommunityScreen from './src/screens/CommunityScreen';
 
 const Stack = createStackNavigator();
 
@@ -34,7 +35,8 @@ const App = () => {
           <Stack.Group>
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="UploadAPost" component={UploadAPostScreen} />
-            <Stack.Screen name="MyPosts" component={MyPostsScreen}/>
+            <Stack.Screen name="MyPosts" component={MyPostsScreen} />
+            <Stack.Screen name="Community" component={CommunityScreen} />
           </Stack.Group>
         ) : (
           <>

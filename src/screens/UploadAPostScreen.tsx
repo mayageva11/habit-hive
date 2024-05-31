@@ -76,6 +76,9 @@ const UploadAPostScreen: React.FC = () => {
     // Navigate to the habits screen
     navigation.navigate('Habits' as never);
   };
+  const handleProfile = () => {
+    navigation.navigate('Profile' as never);
+  }
 
   const handleLogout = async () => {
     try {
@@ -177,7 +180,7 @@ const UploadAPostScreen: React.FC = () => {
 
       {/* Bottom navigation */}
       <View style={styles.bottomNavigationBar}>
-        <TouchableOpacity style={styles.navButton} onPress={handleMyPosts}>
+        <TouchableOpacity style={styles.navButton} onPress={handleProfile}>
           <Icon name="list-alt" size={24} color="#53372D" />
           <Text style={styles.navButtonText}>MY POSTS</Text>
         </TouchableOpacity>

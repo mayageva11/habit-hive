@@ -14,7 +14,7 @@ interface UserData {
 }
 
 const ProfileScreen = () => {
-    const navigation = useNavigation();
+   const navigation = useNavigation();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +86,9 @@ const ProfileScreen = () => {
   const handleHabits = () => {
     navigation.navigate('Habits' as never);
   };
+  const handleProfile = () => {
+    navigation.navigate('Profile' as never);
+  }
 
   const handleLogout = async () => {
     try {
@@ -133,7 +136,7 @@ const ProfileScreen = () => {
 
       {/* Additional bottom navigation */}
       <View style={styles.bottomNavigationBar}>
-        <TouchableOpacity style={styles.navButton} onPress={handleLogout}>
+        <TouchableOpacity style={styles.navButton} onPress={handleProfile}>
           <Icon name="person-outline" size={24} color="#53372D" />
           <Text style={styles.navButtonText}>PROFILE</Text>
         </TouchableOpacity>
