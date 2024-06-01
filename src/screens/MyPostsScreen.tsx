@@ -4,8 +4,15 @@ import { View, FlatList, StyleSheet, Image, TouchableOpacity, Text } from 'react
 import { Card, Title, Paragraph, Avatar, IconButton } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../App';
+
+type MyPostsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MyPosts'>;
+
+type Props = {
+  navigation: MyPostsScreenNavigationProp;
+};
 
 interface Post {
   id: string;
@@ -15,45 +22,50 @@ interface Post {
   userImage: string;
   postImage: string;
   createdAt: Date;
+  uid: string;
 }
 
-const MyPostsScreen: React.FC = () => {
+const MyPostsScreen: React.FC<Props> = ({ navigation }) => {
   const user = auth().currentUser;
-  const navigation = useNavigation();
   const [posts, setPosts] = useState<Post[]>([]);
 
+  const fetchUserPosts = async () => {
+    try {
+      const postSnapshot = await firestore()
+        .collection('posts')
+        .where('uid', '==', user?.uid)
+        .get();
+
+      const postData: Post[] = await Promise.all(
+        postSnapshot.docs.map(async (doc) => ({
+          id: doc.id,
+          title: doc.data().title,
+          content: doc.data().content,
+          userName: doc.data().userName,
+          userImage: doc.data().profileImage,
+          postImage: doc.data().image,
+          createdAt: doc.data().createdAt.toDate(),
+          uid: doc.data().uid,
+        }))
+      );
+
+      setPosts(postData);
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserPosts = async () => {
-      try {
-        const postSnapshot = await firestore()
-          .collection('posts')
-          .where('uid', '==', user?.uid)
-          .get();
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchUserPosts();
+    });
 
-        const postData: Post[] = await Promise.all(
-          postSnapshot.docs.map(async (doc) => ({
-            id: doc.id,
-            title: doc.data().title,
-            content: doc.data().content,
-            userName: doc.data().userName,
-            userImage: doc.data().profileImage,
-            postImage: doc.data().image,
-            createdAt: doc.data().createdAt.toDate(),
-          }))
-        );
-
-        setPosts(postData);
-      } catch (error) {
-        console.error('Error fetching user posts:', error);
-      }
-    };
-
-    fetchUserPosts();
-  }, [user?.uid]);
+    return unsubscribe;
+  }, [navigation]);
 
   const handleEditPost = (post: Post) => {
     // Navigate to the edit post screen
-    // navigation.navigate('EditPost', { post });
+    navigation.navigate('EditPost', { post, postId: post.id });
   };
 
   const handleDeletePost = async (postId: string) => {
@@ -71,23 +83,24 @@ const MyPostsScreen: React.FC = () => {
 
   const handleCommunity = () => {
     // Navigate to the community screen
-    navigation.navigate('Community' as never);
+    navigation.navigate('Community');
   };
 
   const handleHabits = () => {
     // Navigate to the habits screen
-    navigation.navigate('Habits' as never);
+    // navigation.navigate('Habits');
   };
+
   const handleProfile = () => {
     // Navigate to the habits screen
-    navigation.navigate('Profile' as never);
+    navigation.navigate('Profile');
   };
 
   const handleLogout = async () => {
     try {
       await auth().signOut();
       // Optionally, you can navigate to the login screen after successful logout
-      navigation.navigate('Login' as never);
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -101,28 +114,28 @@ const MyPostsScreen: React.FC = () => {
         renderItem={({ item }) => (
           <Card style={styles.card}>
             <View style={styles.cardHeader}>
-            <Image source={{ uri: item.userImage }} style={styles.avatar} /> 
-            <View style={styles.cardTitle}>
-              <Title style={styles.userName}>{item.userName}</Title>
-              <Title style={styles.title}>{item.title}</Title>
-            </View>
+              <Image source={{ uri: item.userImage }} style={styles.avatar} />
+              <View style={styles.cardTitle}>
+                <Title style={styles.userName}>{item.userName}</Title>
+                <Title style={styles.title}>{item.title}</Title>
+              </View>
             </View>
             <Image source={{ uri: item.postImage }} style={styles.postImage} />
             <Card.Content>
               <Paragraph style={styles.content}>{item.content}</Paragraph>
             </Card.Content>
             <Card.Actions>
-                <IconButton
-                    icon="pencil"
-                    style={styles.deleteIcon}
-                    onPress={() => handleEditPost(item)}
-                />
-                <IconButton
-                     icon="delete"
-                     size={24}
-                     style={[styles.deleteIcon, { backgroundColor: '#FFC107' }]}
-                     onPress={() => handleDeletePost(item.id)}
-                />
+              <IconButton
+                icon="pencil"
+                style={styles.deleteIcon}
+                onPress={() => handleEditPost(item)}
+              />
+              <IconButton
+                icon="delete"
+                size={24}
+                style={[styles.deleteIcon, { backgroundColor: '#FFC107' }]}
+                onPress={() => handleDeletePost(item.id)}
+              />
             </Card.Actions>
           </Card>
         )}
@@ -212,14 +225,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 16,
   },
-  title:{
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
   },
-  content:{
+  content: {
     fontSize: 20,
     marginTop: 15,
-  }
+  },
 });
 
 export default MyPostsScreen;
