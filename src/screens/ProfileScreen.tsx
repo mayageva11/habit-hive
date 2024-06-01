@@ -3,7 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } fr
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../App'; 
+
+type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
+
+type Props = {
+  navigation: ProfileScreenNavigationProp;
+};
+
 
 interface UserData {
   uid: string;
@@ -13,8 +21,7 @@ interface UserData {
   image: string;
 }
 
-const ProfileScreen = () => {
-   const navigation = useNavigation();
+const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,33 +75,33 @@ const ProfileScreen = () => {
   }
 
   const handleEditProfile = () => {
-    navigation.navigate('EditProfile' as never);
+    // navigation.navigate('EditProfile' );
   };
 
   const handleMyPosts = () => {
-    navigation.navigate('MyPosts' as never);
+    navigation.navigate('MyPosts');
   };
 
   const handleUploadPost = () => {
-    navigation.navigate('UploadAPost' as never);
+    navigation.navigate('UploadAPost');
   };
 
   const handleCommunity = () => {
-    navigation.navigate('Community' as never);
+    navigation.navigate('Community');
   };
 
   const handleHabits = () => {
-    navigation.navigate('Habits' as never);
+    // navigation.navigate('Habits');
   };
   const handleProfile = () => {
-    navigation.navigate('Profile' as never);
+    navigation.navigate('Profile');
   }
 
   const handleLogout = async () => {
     try {
         await auth().signOut();
         // Optionally, you can navigate to the login screen after successful logout
-        navigation.navigate('Login' as never);
+        navigation.navigate('Login');
       } catch (error) {
         console.error('Error signing out:', error);
       }

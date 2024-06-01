@@ -5,10 +5,17 @@ import { Menu, Divider, Provider as PaperProvider, Button } from 'react-native-p
 import { launchImageLibrary } from 'react-native-image-picker';
 import beeLogo from '../assets/bee_image.png';
 import placeHolder from '../assets/placeholder.png';
-import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import AuthService from '../services/AuthService';
 import storage from '@react-native-firebase/storage';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../App'; 
+
+type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
+
+type Props = {
+  navigation: RegisterScreenNavigationProp;
+};
 
 interface FormData {
   name: string;
@@ -19,8 +26,7 @@ interface FormData {
   goal: string;
 }
 
-const RegisterScreen = () => {
-  const navigation = useNavigation();
+const RegisterScreen :React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

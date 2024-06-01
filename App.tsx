@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { StackScreenProps, createStackNavigator } from '@react-navigation/stack';
 import auth from '@react-native-firebase/auth';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -8,8 +8,19 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import UploadAPostScreen from './src/screens/UploadAPostScreen';
 import MyPostsScreen from './src/screens/MyPostsScreen';
 import CommunityScreen from './src/screens/CommunityScreen';
+import EditPostScreen, { Post } from './src/screens/EditPostScreen';
 
-const Stack = createStackNavigator();
+export type RootStackParamList = {
+  Profile: undefined;
+  UploadAPost: undefined;
+  MyPosts: undefined;
+  Community: undefined;
+  EditPost: { post: Post; postId: string };
+  Login: undefined;
+  Register: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
   const [initializing, setInitializing] = useState(true);
@@ -37,6 +48,11 @@ const App = () => {
             <Stack.Screen name="UploadAPost" component={UploadAPostScreen} />
             <Stack.Screen name="MyPosts" component={MyPostsScreen} />
             <Stack.Screen name="Community" component={CommunityScreen} />
+            <Stack.Screen
+              name="EditPost"
+              component={EditPostScreen as React.ComponentType<StackScreenProps<RootStackParamList>>}
+              options={{ title: 'Edit Post' }}
+            />
           </Stack.Group>
         ) : (
           <>

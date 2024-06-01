@@ -9,9 +9,16 @@ import Toast from 'react-native-toast-message';
 import auth from '@react-native-firebase/auth';
 import storage from '@react-native-firebase/storage';
 import placeHolder from '../assets/post_image.jpg';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../App'; 
 
-const UploadAPostScreen: React.FC = () => {
-  const navigation = useNavigation();
+type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
+
+type Props = {
+  navigation: RegisterScreenNavigationProp;
+};
+
+const UploadAPostScreen:React.FC<Props> = ({ navigation }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const user =  auth().currentUser;
@@ -54,7 +61,7 @@ const UploadAPostScreen: React.FC = () => {
         createdAt: firestore.FieldValue.serverTimestamp(),
       });
       // Navigate to the "Posts" screen after successful post upload
-      navigation.navigate('MyPosts' as never);
+      navigation.navigate('MyPosts');
     } catch (error) {
       console.error('Error saving post:', error);
       // Display an error message to the user
@@ -64,27 +71,27 @@ const UploadAPostScreen: React.FC = () => {
 
   const handleMyPosts = () => {
     // Navigate to the user's posts screen
-    navigation.navigate('MyPosts' as never);
+    navigation.navigate('MyPosts');
   };
 
   const handleCommunity = () => {
     // Navigate to the community screen
-    navigation.navigate('Community' as never);
+    navigation.navigate('Community');
   };
 
   const handleHabits = () => {
     // Navigate to the habits screen
-    navigation.navigate('Habits' as never);
+    // navigation.navigate('Habits');
   };
   const handleProfile = () => {
-    navigation.navigate('Profile' as never);
+    navigation.navigate('Profile' );
   }
 
   const handleLogout = async () => {
     try {
       await auth().signOut();
       // Optionally, you can navigate to the login screen after successful logout
-      navigation.navigate('Login' as never);
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Error signing out:', error);
     }
