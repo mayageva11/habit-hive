@@ -62,15 +62,15 @@ const CommunityScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   const handleProfile = () => {
-    navigation.navigate('Profile' as never);
+    navigation.navigate('Profile');
   };
 
   const handleCommunity = () => {
-    navigation.navigate('Community' as never);
+    navigation.navigate('Community');
   };
 
   const handleHabits = () => {
-    navigation.navigate('Habits' as never);
+    navigation.navigate('Habits');
   };
 
   const handleLogout = async () => {

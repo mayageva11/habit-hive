@@ -69,11 +69,6 @@ const UploadAPostScreen:React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleMyPosts = () => {
-    // Navigate to the user's posts screen
-    navigation.navigate('MyPosts');
-  };
-
   const handleCommunity = () => {
     // Navigate to the community screen
     navigation.navigate('Community');

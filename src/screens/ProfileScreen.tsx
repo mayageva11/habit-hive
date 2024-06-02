@@ -93,7 +93,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleHabits = () => {
-    // navigation.navigate('Habits');
+    navigation.navigate('Habits');
   };
   const handleProfile = () => {
     navigation.navigate('Profile');
