@@ -5,6 +5,7 @@ import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App'; 
+import { useIsFocused } from '@react-navigation/native';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -25,6 +26,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isFocused = useIsFocused();
 
 
   useEffect(() => {
@@ -52,7 +54,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
     };
 
     fetchUserData();
-  }, []);
+  }, [navigation, isFocused]);
 
   if (loading) {
     return (
@@ -75,7 +77,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   const handleEditProfile = () => {
-    // navigation.navigate('EditProfile' );
+    navigation.navigate('EditProfile' );
   };
 
   const handleMyPosts = () => {
