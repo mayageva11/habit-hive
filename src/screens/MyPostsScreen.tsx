@@ -7,6 +7,7 @@ import auth from '@react-native-firebase/auth';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
+import { useIsFocused } from '@react-navigation/native';
 
 type MyPostsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MyPosts'>;
 
@@ -28,6 +29,7 @@ interface Post {
 const MyPostsScreen: React.FC<Props> = ({ navigation }) => {
   const user = auth().currentUser;
   const [posts, setPosts] = useState<Post[]>([]);
+  const isFocused = useIsFocused();
 
   const fetchUserPosts = async () => {
     try {
@@ -56,12 +58,10 @@ const MyPostsScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+  
       fetchUserPosts();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
+    
+  }, [ navigation,isFocused]);
 
   const handleEditPost = (post: Post) => {
     // Navigate to the edit post screen

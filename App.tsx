@@ -9,6 +9,9 @@ import UploadAPostScreen from './src/screens/UploadAPostScreen';
 import MyPostsScreen from './src/screens/MyPostsScreen';
 import CommunityScreen from './src/screens/CommunityScreen';
 import EditPostScreen, { Post } from './src/screens/EditPostScreen';
+import EditProfileScreen from './src/screens/EditProfileScreen';
+import Toast from 'react-native-toast-message';
+import { View } from 'react-native';
 
 export type RootStackParamList = {
   Profile: undefined;
@@ -18,6 +21,7 @@ export type RootStackParamList = {
   EditPost: { post: Post; postId: string };
   Login: undefined;
   Register: undefined;
+  EditProfile: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -53,6 +57,7 @@ const App = () => {
               component={EditPostScreen as React.ComponentType<StackScreenProps<RootStackParamList>>}
               options={{ title: 'Edit Post' }}
             />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           </Stack.Group>
         ) : (
           <>
@@ -62,6 +67,7 @@ const App = () => {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    
   );
 };
 

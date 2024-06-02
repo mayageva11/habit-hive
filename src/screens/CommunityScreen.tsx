@@ -5,6 +5,15 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import firebase from '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
+import { useIsFocused } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../App';
+
+type CommunityScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Community'>;
+
+type Props = {
+  navigation: CommunityScreenNavigationProp;
+};
 
 interface Post {
   id: string;
@@ -14,12 +23,14 @@ interface Post {
   userImage: string;
   postImage: string;
   createdAt: Date;
+  uid: string;
 }
 
-const CommunityScreen: React.FC = () => {
+
+const CommunityScreen: React.FC<Props> = ({ navigation }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [searchText, setSearchText] = useState('');
-  const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -34,16 +45,17 @@ const CommunityScreen: React.FC = () => {
             userImage: doc.data().profileImage,
             postImage: doc.data().image,
             createdAt: doc.data().createdAt.toDate(),
+            uid: doc.data().uid, // Add the uid property here
           }))
         );
-
+  
         setPosts(postData);
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
     };
     fetchPosts();
-  }, []);
+  }, [navigation, isFocused]);
 
   const filteredPosts = posts.filter((post) =>
     post.userName.toLowerCase().includes(searchText.toLowerCase())
