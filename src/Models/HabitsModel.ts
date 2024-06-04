@@ -39,7 +39,7 @@ export class HabitsModel {
           'SELECT tasks FROM habits WHERE uid = ?',
           [uid],
           (_, { rows }) => {
-            let tasks: string[] = [];
+            let tasks: String[] = [];
             if (rows.length > 0) {
               tasks = JSON.parse(rows.item(0).tasks);
             }
