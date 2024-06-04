@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
 import { useIsFocused } from '@react-navigation/native';
+import { PostModel } from '../Models/PostModel';
 
 type MyPostsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MyPosts'>;
 
@@ -26,34 +27,57 @@ interface Post {
   uid: string;
 }
 
+interface post {
+  id: string;
+  uid: string;
+  title: string;
+  content: string;
+}
+
 const MyPostsScreen: React.FC<Props> = ({ navigation }) => {
   const user = auth().currentUser;
   const [posts, setPosts] = useState<Post[]>([]);
+  const [localPosts, setLocalPosts] = useState<post[]>([]);
   const isFocused = useIsFocused();
 
   const fetchUserPosts = async () => {
     try {
-      const postSnapshot = await firestore()
-        .collection('posts')
-        .where('uid', '==', user?.uid)
-        .get();
-
-      const postData: Post[] = await Promise.all(
-        postSnapshot.docs.map(async (doc) => ({
-          id: doc.id,
-          title: doc.data().title,
-          content: doc.data().content,
-          userName: doc.data().userName,
-          userImage: doc.data().profileImage,
-          postImage: doc.data().image,
-          createdAt: doc.data().createdAt.toDate(),
-          uid: doc.data().uid,
-        }))
-      );
-
-      setPosts(postData);
+      if (user?.uid) {
+        // Fetch posts from Firestore
+        const postSnapshot = await firestore()
+          .collection('posts')
+          .where('uid', '==', user.uid)
+          .get();
+  
+        if (postSnapshot.empty) {
+          // If no posts are found in Firestore, fetch posts from the local database
+          const localPosts = await PostModel.getPostsByUserId(user.uid);
+          setLocalPosts(localPosts);
+        } else {
+          // If posts are found in Firestore, map the data and set the state
+          const postData: Post[] = await Promise.all(
+            postSnapshot.docs.map(async (doc) => ({
+              id: doc.id,
+              title: doc.data().title,
+              content: doc.data().content,
+              userName: doc.data().userName,
+              userImage: doc.data().profileImage,
+              postImage: doc.data().image,
+              createdAt: doc.data().createdAt.toDate(),
+              uid: doc.data().uid,
+            }))
+          );
+  
+          setPosts(postData);
+        }
+      }
     } catch (error) {
       console.error('Error fetching user posts:', error);
+      // If there's an error fetching from Firestore, try fetching from the local database
+      if (user?.uid) {
+        const localPosts = await PostModel.getPostsByUserId(user.uid);
+        setLocalPosts(localPosts);
+      }
     }
   };
 
@@ -72,7 +96,9 @@ const MyPostsScreen: React.FC<Props> = ({ navigation }) => {
     try {
       // Delete the post from Firestore
       await firestore().collection('posts').doc(postId).delete();
-
+      //delete from the local db
+      PostModel.deletePost(postId);
+      
       // Refresh the posts
       const updatedPosts = posts.filter((post) => post.id !== postId);
       setPosts(updatedPosts);
@@ -88,7 +114,7 @@ const MyPostsScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleHabits = () => {
     // Navigate to the habits screen
-    // navigation.navigate('Habits');
+    navigation.navigate('Habits');
   };
 
   const handleProfile = () => {

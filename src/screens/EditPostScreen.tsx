@@ -6,6 +6,8 @@ import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import auth from '@react-native-firebase/auth';
+import { PostModel } from '../Models/PostModel';
 
 export interface Post {
   id: string;
@@ -33,6 +35,7 @@ const EditPostScreen: React.FC<EditPostScreenProps> = ({ route, navigation }) =>
   const [content, setContent] = useState(post.content);
   const [image, setImage] = useState(post.postImage);
   const [isLoading, setIsLoading] = useState(false);
+  const user =  auth().currentUser;
 
   const handleImageUpload = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo' });
@@ -103,6 +106,20 @@ const EditPostScreen: React.FC<EditPostScreenProps> = ({ route, navigation }) =>
         title,
         content,
         image: image, 
+      });
+
+      const localpost ={
+        id: postRef.id,
+        uid: user?.uid || '',
+        title,
+        content,
+      }
+      PostModel.updatePost(localpost)
+      .then(() => {
+        console.log('Post updated successfully');
+      })
+      .catch((error) => {
+        console.log('Error updating post:', error);
       });
 
       // Show a success toast message

@@ -119,7 +119,7 @@ const renderHabitTask = ({ item }: { item: any }) => (
     <View style={styles.container}>
       <Image source={require('../assets/bee_image.png')} style={styles.beeImage} />
       <Text style={styles.quote}>{quote}</Text>
-      <Text style={styles.tasksCompleted}>Tasks You've Completed: {tasksCompleted}</Text>
+      <Text style={styles.tasksCompleted}>Tasks You've Completed Today: {tasksCompleted}</Text>
       <TextInput
         value={newTask}
         onChangeText={setNewTask}

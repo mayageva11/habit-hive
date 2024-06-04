@@ -11,6 +11,7 @@ import storage from '@react-native-firebase/storage';
 import placeHolder from '../assets/post_image.jpg';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App'; 
+import { PostModel, Post } from '../Models/PostModel';
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -51,14 +52,29 @@ const UploadAPostScreen:React.FC<Props> = ({ navigation }) => {
 
   const handleSubmit = async () => {
     try {
-      await firestore().collection('posts').add({
+      const postRef = await firestore().collection('posts').add({
         uid: user?.uid,
         title,
         content,
         image,
         userName,
         profileImage,
-        createdAt: firestore.FieldValue.serverTimestamp(),
+        createdAt: firestore.FieldValue.serverTimestamp()
+      });
+    
+
+      const post: Post ={
+        id: postRef.id,
+        uid: user?.uid || '',
+        title,
+        content,
+      }
+      PostModel.insertPost(post)
+      .then(() => {
+        console.log('Post inserted successfully');
+      })
+      .catch((error) => {
+        console.log('Error inserting post:', error);
       });
       // Navigate to the "Posts" screen after successful post upload
       navigation.navigate('MyPosts');
@@ -76,7 +92,7 @@ const UploadAPostScreen:React.FC<Props> = ({ navigation }) => {
 
   const handleHabits = () => {
     // Navigate to the habits screen
-    // navigation.navigate('Habits');
+    navigation.navigate('Habits');
   };
   const handleProfile = () => {
     navigation.navigate('Profile' );
@@ -183,8 +199,8 @@ const UploadAPostScreen:React.FC<Props> = ({ navigation }) => {
       {/* Bottom navigation */}
       <View style={styles.bottomNavigationBar}>
         <TouchableOpacity style={styles.navButton} onPress={handleProfile}>
-          <Icon name="list-alt" size={24} color="#53372D" />
-          <Text style={styles.navButtonText}>MY POSTS</Text>
+          <Icon name="person-outline" size={24} color="#53372D" />
+          <Text style={styles.navButtonText}>PROFILE</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} onPress={handleCommunity}>
           <Icon name="people-outline" size={24} color="#53372D" />

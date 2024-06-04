@@ -11,6 +11,7 @@ import CommunityScreen from './src/screens/CommunityScreen';
 import EditPostScreen, { Post } from './src/screens/EditPostScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import HabitsScreen from './src/screens/HabitsScreen';
+import { createTables } from './src/localBD';
 
 export type RootStackParamList = {
   Profile: undefined;
@@ -38,6 +39,7 @@ const App = () => {
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    createTables();
     return subscriber;
   }, []);
 
