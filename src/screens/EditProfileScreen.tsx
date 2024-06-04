@@ -10,6 +10,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
 import { Divider, Menu, PaperProvider } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
+import { UserModel, User } from '../Models/UserModel';
 
 type MyPostsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MyPosts'>;
 
@@ -129,8 +130,13 @@ const EditProfileScreen: React.FC<Props> = ({ navigation }) => {
         goal,
         image,
       });
-      console.log(user?.name);
-        console.log(name);
+      const localuser : User = {
+        uid:user?.uid || '',
+        name,
+        email,
+        goal,
+      }
+      await UserModel.updateUser(localuser);
       
       if(name != user?.name) {
         //edit the user name in the posts of the user by uid

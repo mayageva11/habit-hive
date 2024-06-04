@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App'; 
 import { useIsFocused } from '@react-navigation/native';
+import { UserModel, User } from '../Models/UserModel';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -26,6 +27,7 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [localUser, setLocalUser] = useState<User | null>(null);
   const isFocused = useIsFocused();
 
 
@@ -41,6 +43,8 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
             setUserData(userDoc.data() as UserData);
           } else {
             setError('User data not found');
+            const localUserData = await UserModel.getUserByUid(user.uid);
+            setLocalUser(localUserData);
           }
         } else {
           setError('User not authenticated');
