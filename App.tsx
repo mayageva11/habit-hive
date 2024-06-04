@@ -61,6 +61,7 @@ const App = () => {
             />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="Habits" component={HabitsScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
           </Stack.Group>
         ) : (
           <>

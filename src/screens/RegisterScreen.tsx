@@ -11,6 +11,7 @@ import storage from '@react-native-firebase/storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App'; 
 
+
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
 type Props = {
@@ -76,9 +77,8 @@ const RegisterScreen :React.FC<Props> = ({ navigation }) => {
     try {
       // Send the formData to the server
       // Use auth service
-      await AuthService.registerUser(email, password, formData);
-      // TODO: Save the information locally in SQLite or Realm
-  
+       await AuthService.registerUser(email, password, formData);
+      
       console.log('formData:', formData);
       console.log('successful register');
       // If the registration is successful, navigate to the profile page

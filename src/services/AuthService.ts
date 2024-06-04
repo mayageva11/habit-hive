@@ -1,5 +1,6 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { UserModel, User } from '../Models/UserModel';
 
 interface FormData {
   name: string;
@@ -46,9 +47,16 @@ class AuthService {
         image: formData.image,
         goal: formData.goal,
       };
+      const localUser : User ={
+        uid: currentUserUID,
+        name: formData.name,
+        email: formData.email,
+        goal: formData.goal
+      }
   
         // Save user data to the "users" collection in Firestore
         await firestore().collection('users').doc(currentUserUID).set(userData);
+        await UserModel.insertUser(localUser);
       } catch (error) {
         console.error('Error saving user data:', error);
         throw error;
