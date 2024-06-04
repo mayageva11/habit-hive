@@ -8,6 +8,7 @@ import firestore from '@react-native-firebase/firestore';
 import { useIsFocused } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
+import { PostModel } from '../Models/PostModel';
 
 type CommunityScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Community'>;
 
@@ -26,11 +27,19 @@ interface Post {
   uid: string;
 }
 
+interface post {
+    id: string;
+    uid: string;
+    title: string;
+    content: string;
+  }
+
 
 const CommunityScreen: React.FC<Props> = ({ navigation }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [searchText, setSearchText] = useState('');
   const isFocused = useIsFocused();
+  const [localPosts, setLocalPosts] = useState<post[]>([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -52,6 +61,12 @@ const CommunityScreen: React.FC<Props> = ({ navigation }) => {
         setPosts(postData);
       } catch (error) {
         console.error('Error fetching posts:', error);
+        try {
+            const localPosts = await PostModel.getAllPosts();
+            setLocalPosts(localPosts);
+        } catch (error) {
+            console.error('Error fetching local posts:', error);
+        }
       }
     };
     fetchPosts();
