@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../App';
 import { useIsFocused } from '@react-navigation/native';
+import { HabitsModel, Habit } from '../Models/HabitsModel';
 
 type HabitsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Habits'>;
 
@@ -25,7 +26,7 @@ const HabitScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     fetchQuote();
     fetchHabitTasks();
-  }, [isFocused]);
+  }, [navigation, isFocused]);
 
   const fetchQuote = async () => {
     try {
@@ -52,6 +53,7 @@ const HabitScreen: React.FC<Props> = ({ navigation }) => {
       if (!snapshot.empty) {
         const doc = snapshot.docs[0];
         setHabitTasks(doc.data().tasks);
+        setTasksCompleted(doc.data().completedTasks);
       }
     }
   };
@@ -65,21 +67,38 @@ const HabitScreen: React.FC<Props> = ({ navigation }) => {
       if (!snapshot.empty) {
         const doc = snapshot.docs[0];
         const updatedTasks = [...doc.data().tasks, newTask];
+        const completedTasksCount = doc.data().completedTasks || 0;
         await doc.ref.update({
           tasks: updatedTasks,
+          completedTasks: completedTasksCount,
         });
+        // Local insert
+        const localHabit: Habit = {
+          uid: user.uid,
+          tasks: updatedTasks,
+          completedTasks: completedTasksCount,
+        };
+        await HabitsModel.insertTask(user.uid, newTask);
       } else {
         await habitRef.add({
           uid: user.uid,
           tasks: [newTask],
+          completedTasks: 0,
         });
+        // Local insert
+        const localHabit: Habit = {
+          uid: user.uid,
+          tasks: [newTask],
+          completedTasks: 0,
+        };
+        await HabitsModel.insertTask(user.uid, newTask);
       }
       setNewTask('');
       fetchHabitTasks();
     }
   };
 
-  const handleCompleteTask = async (task: String) => {
+  const handleCompleteTask = async (task: string) => {
     const user = auth().currentUser;
     if (user) {
       const db = firestore();
@@ -87,13 +106,15 @@ const HabitScreen: React.FC<Props> = ({ navigation }) => {
       const snapshot = await habitRef.where('uid', '==', user.uid).get();
       if (!snapshot.empty) {
         const doc = snapshot.docs[0];
-        const updatedTasks = doc.data().tasks.filter((item: String) => item !== task);
+        const updatedTasks = doc.data().tasks.filter((item: string) => item !== task);
+        const completedTasksCount = doc.data().completedTasks || 0;
         await doc.ref.update({
           tasks: updatedTasks,
+          completedTasks: completedTasksCount + 1,
         });
-        setTasksCompleted(tasksCompleted + 1);
+        
         fetchHabitTasks();
-      }
+      } 
     }
   };
 
@@ -119,7 +140,7 @@ const renderHabitTask = ({ item }: { item: any }) => (
     <View style={styles.container}>
       <Image source={require('../assets/bee_image.png')} style={styles.beeImage} />
       <Text style={styles.quote}>{quote}</Text>
-      <Text style={styles.tasksCompleted}>Tasks You've Completed Today: {tasksCompleted}</Text>
+      <Text style={styles.tasksCompleted}>Tasks You've Completed: {tasksCompleted}</Text>
       <TextInput
         value={newTask}
         onChangeText={setNewTask}

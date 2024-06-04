@@ -38,7 +38,7 @@ export const createTables = () => {
       );
   
       tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS habits (uid TEXT PRIMARY KEY, tasks TEXT)',
+        'CREATE TABLE IF NOT EXISTS habits (uid TEXT PRIMARY KEY, tasks TEXT, completedTasks TEXT )',
         [],
         () => {
           console.log('Habits table created successfully');
